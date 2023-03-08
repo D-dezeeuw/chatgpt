@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Three.js Ring Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  </head>
+  <body>
+    <script>
+      const Random = require('davidfig-random');
+
+      function generateRing(radius, tubeRadius, pointCount, seed, mean = 0, stdev = 1) {
+        const points = [];
+
+        const TWO_PI = Math.PI * 2;
+
+        const rng = new Random(seed);
+
+        for (let i = 0; i < pointCount; i++) {
+          const t = i / pointCount * TWO_PI + rng.normal(mean, stdev) * TWO_PI;
+          const x = (radius + tubeRadius * Math.cos(t)) * Math.cos(t);
+          const y = (radius + tubeRadius * Math.cos(t)) * Math.sin(t);
+          const z = tubeRadius * Math.sin(t);
+          points.push([x, y, z]);
+        }
+
+        return points;
+      }
+
+      // Generate a ring with radius 10, tube radius 3, and 1000 points using a seed value of 'mySeed' and a normal distribution with mean 0 and standard deviation 0.1
+      const ringPoints = generateRing(10, 3, 1000, 'mySeed', 0, 0.1);
+
+      // Initialize the scene, camera, and renderer
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Add a ring geometry to the scene
+      const ringGeometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(ringPoints.flat());
+      ringGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const material = new THREE.PointsMaterial({ color: 0xffffff });
+      const ringPointsObject = new THREE.Points(ringGeometry, material);
+      scene.add(ringPointsObject);
+
+      // Position the camera to view the ring
+      camera.position.z = 20;
+
+      // Render the scene
+      function animate() {
+        requestAnimationFrame(animate);
+        ringPointsObject.rotation.x += 0.01;
+        ringPointsObject.rotation.y += 0.01;
+        renderer.render(scene, camera);
+      }
+      animate();
+    </script>
+  </body>
+</html>
